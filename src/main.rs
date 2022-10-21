@@ -1,8 +1,6 @@
 use env_logger::{Builder, Env};
 use log::info;
-use prometheus_exporter::prometheus::{
-    register_counter, register_gauge, register_int_gauge, register_int_gauge_vec,
-};
+use prometheus_exporter::prometheus::register_int_gauge_vec;
 use std::env;
 use std::net::SocketAddr;
 use tokio_postgres::{Client, Config, Error, NoTls};
@@ -93,7 +91,11 @@ async fn main() {
     Builder::from_env(Env::default().default_filter_or("info")).init();
 
     // Parse address used to bind exporter to.
-    let addr_raw = "0.0.0.0:9185";
+    let addr_raw = format!(
+        "{}:{}",
+        &env::var("LISTEN").unwrap_or("127.0.0.1".to_string()),
+        &env::var("PORT").unwrap_or("9185".to_string())
+    );
     let addr: SocketAddr = addr_raw.parse().expect("can not parse listen addr");
 
     let gauge_invocations = register_int_gauge_vec!(
@@ -145,6 +147,5 @@ async fn main() {
                 .with_label_values(&[&v.event, &v.delivered.to_string()])
                 .set(v.count)
         });
-        //gauge_invocations.set(result.count_invocation)
     }
 }
