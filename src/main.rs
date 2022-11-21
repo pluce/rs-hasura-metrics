@@ -40,16 +40,16 @@ async fn get_stats(client: &Client) -> Result<Stats, Error> {
     // Now we can execute a simple statement that just returns its parameter.
     let rows_invocation = client
         .query(
-            "SELECT trigger_name as event, status, COUNT(distinct i.id) as count FROM \"hdb_catalog\".\"event_invocation_logs\" i
+            "SELECT e.trigger_name as event, i.status, COUNT(distinct i.id) as count FROM \"hdb_catalog\".\"event_invocation_logs\" i
 	INNER JOIN \"hdb_catalog\".\"event_log\" e ON i.event_id = e.id
-	GROUP BY trigger_name, status;",
+	GROUP BY e.trigger_name, i.status;",
             &[],
         );
 
     // Now we can execute a simple statement that just returns its parameter.
     let rows_events = client
         .query(
-            "SELECT trigger_name as event, delivered, COUNT(distinct e.id) as count FROM \"hdb_catalog\".\"event_log\" e GROUP BY trigger_name, delivered;",
+            "SELECT e.trigger_name as event, e.delivered, COUNT(distinct e.id) as count FROM \"hdb_catalog\".\"event_log\" e GROUP BY e.trigger_name, e.delivered;",
             &[],
         );
 
